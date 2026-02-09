@@ -13,12 +13,6 @@ class Category(BaseModel):
                             help_text='Идентификатор страницы для URL; '
                             'разрешены символы латиницы, цифры, '
                             'дефис и подчёркивание.')
-    is_published = models.BooleanField(
-        "Опубликовано",
-        default=True,
-        help_text="Снимите галочку, чтобы скрыть публикацию.",
-    )
-    created_at = models.DateTimeField("Добавлено", auto_now_add=True)
 
     class Meta:
         verbose_name = 'категория'
@@ -27,12 +21,6 @@ class Category(BaseModel):
 
 class Location(BaseModel):
     name = models.CharField('Название места', max_length=256)
-    is_published = models.BooleanField(
-        "Опубликовано",
-        default=True,
-        help_text="Снимите галочку, чтобы скрыть публикацию.",
-    )
-    created_at = models.DateTimeField("Добавлено", auto_now_add=True)
 
     class Meta:
         verbose_name = 'местоположение'
@@ -65,12 +53,6 @@ class Post(BaseModel):
         blank=False,
         verbose_name='Категория'
     )
-    is_published = models.BooleanField(
-        "Опубликовано",
-        default=True,
-        help_text="Снимите галочку, чтобы скрыть публикацию.",
-    )
-    created_at = models.DateTimeField("Добавлено", auto_now_add=True)
     image = models.ImageField(
         "Изображение",
         upload_to="posts/",
@@ -102,6 +84,5 @@ class Comment(models.Model):
     )
 
     class Meta:
-        ordering = ("created_at",)
         verbose_name = "комментарий"
         verbose_name_plural = "Комментарии"
