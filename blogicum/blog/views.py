@@ -16,13 +16,13 @@ POSTSCOUNT = 10
 User = get_user_model()
 
 
-def _paginate(request, queryset):
+def paginate(request, queryset):
     paginator = Paginator(queryset, POSTSCOUNT)
     page_number = request.GET.get('page')
     return paginator.get_page(page_number)
 
 
-def _published_posts_filter():
+def is_published_post():
     return (
         Q(pub_date__lte=timezone.now())
         & Q(is_published=True)
@@ -39,7 +39,7 @@ class IndexView(ListView):
     def get_queryset(self):
         return (
             Post.objects
-            .filter(_published_posts_filter())
+            .filter(is_published_post())
             .select_related('location', 'author', 'category')
             .order_by('-pub_date')
             .annotate(comment_count=Count('comments'))
@@ -54,9 +54,9 @@ def post_detail(request, id):
     template = 'blog/detail.html'
     q = Post.objects.select_related('category', 'location', 'author')
     if request.user.is_authenticated:
-        query = q.filter(Q(author=request.user) | _published_posts_filter())
+        query = q.filter(is_published_post() | Q(author=request.user))
     else:
-        query = q.filter(_published_posts_filter())
+        query = q.filter(is_published_post())
     post = get_object_or_404(query, id=id)
     comments = (
         Comment.objects.select_related('author')
@@ -82,12 +82,12 @@ def category_posts(request, category_slug):
     posts = (
         Post.objects.select_related('location', 'author')
         .filter(category=category)
-        .filter(_published_posts_filter())
+        .filter(is_published_post())
         .annotate(comment_count=Count('comments'))
         .order_by('-pub_date')
     )
 
-    page_obj = _paginate(request, posts)
+    page_obj = paginate(request, posts)
 
     context = {
         'category': category,
@@ -106,12 +106,12 @@ def profile(request, username):
         .filter(author=profile_user)
     )
     if request.user != profile_user:
-        posts = posts.filter(_published_posts_filter())
+        posts = posts.filter(is_published_post())
     posts = (
         posts.annotate(comment_count=Count('comments'))
         .order_by('-pub_date')
     )
-    page_obj = _paginate(request, posts)
+    page_obj = paginate(request, posts)
     context = {'profile': profile_user, 'page_obj': page_obj}
     return render(request, template, context)
 
@@ -188,9 +188,9 @@ def post_delete(request, id):
 def add_comment(request, post_id):
     q = Post.objects.select_related('category', 'location', 'author')
     if request.user.is_authenticated:
-        query = q.filter(Q(author=request.user) | _published_posts_filter())
+        query = q.filter(is_published_post() | Q(author=request.user))
     else:
-        query = q.filter(_published_posts_filter())
+        query = q.filter(is_published_post())
     post = get_object_or_404(query, id=post_id)
     form = CommentForm(request.POST)
     if form.is_valid():
