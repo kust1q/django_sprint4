@@ -11,30 +11,16 @@ from django.urls import reverse_lazy
 from .models import Post, Category, Comment
 from .forms import PostForm, CommentForm, UserRegistrationForm, UserEditForm
 
-POSTSCOUNT = 10
+PAGINATE_POSTS_COUNT = 10
 
 User = get_user_model()
-
-
-def paginate(request, queryset):
-    paginator = Paginator(queryset, POSTSCOUNT)
-    page_number = request.GET.get('page')
-    return paginator.get_page(page_number)
-
-
-def is_published_post():
-    return (
-        Q(pub_date__lte=timezone.now())
-        & Q(is_published=True)
-        & Q(category__is_published=True)
-    )
 
 
 class IndexView(ListView):
     model = Post
     template_name = 'blog/index.html'
     context_object_name = 'page_obj'
-    paginate_by = 10
+    paginate_by = PAGINATE_POSTS_COUNT
 
     def get_queryset(self):
         return (
@@ -235,3 +221,17 @@ def delete_comment(request, post_id, comment_id):
         return redirect('blog:post_detail', id=post_id)
     context = {'comment': comment, 'post': comment.post}
     return render(request, template, context)
+
+
+def paginate(request, queryset):
+    paginator = Paginator(queryset, PAGINATE_POSTS_COUNT)
+    page_number = request.GET.get('page')
+    return paginator.get_page(page_number)
+
+
+def is_published_post():
+    return (
+        Q(pub_date__lte=timezone.now())
+        & Q(is_published=True)
+        & Q(category__is_published=True)
+    )
