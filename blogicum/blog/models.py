@@ -5,14 +5,22 @@ from core.models import BaseModel
 
 User = get_user_model()
 
+MAX_TITLE_LENGTH = 256
+MAX_LOCATION_NAME_LENGTH = 256
+MAX_SLUG_LENGTH = 64
+
 
 class Category(BaseModel):
-    title = models.CharField('Заголовок', max_length=256)
+    title = models.CharField('Заголовок', max_length=MAX_TITLE_LENGTH)
     description = models.TextField('Описание')
-    slug = models.SlugField('Идентификатор', max_length=64, unique=True,
-                            help_text='Идентификатор страницы для URL; '
-                            'разрешены символы латиницы, цифры, '
-                            'дефис и подчёркивание.')
+    slug = models.SlugField(
+        'Идентификатор',
+        max_length=MAX_SLUG_LENGTH,
+        unique=True,
+        help_text='Идентификатор страницы для URL; '
+                  'разрешены символы латиницы, цифры, '
+                  'дефис и подчёркивание.'
+    )
 
     class Meta:
         verbose_name = 'категория'
@@ -20,7 +28,10 @@ class Category(BaseModel):
 
 
 class Location(BaseModel):
-    name = models.CharField('Название места', max_length=256)
+    name = models.CharField(
+        'Название места',
+        max_length=MAX_LOCATION_NAME_LENGTH
+    )
 
     class Meta:
         verbose_name = 'местоположение'
@@ -28,7 +39,7 @@ class Location(BaseModel):
 
 
 class Post(BaseModel):
-    title = models.CharField('Заголовок', max_length=256)
+    title = models.CharField('Заголовок', max_length=MAX_TITLE_LENGTH)
     text = models.TextField('Текст')
     pub_date = models.DateTimeField('Дата и время публикации',
                                     help_text='Если установить дату и время '
